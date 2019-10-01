@@ -6,8 +6,13 @@ class DataSampling:
     @staticmethod
     def loadData(fileName, randomNum, selectedCols):
         num_lines = sum(1 for l in open(fileName))
-        skip_idx = random.sample(range(2, num_lines), num_lines - randomNum - 2)
+        skip_idx = random.sample(range(2, num_lines),
+                                 num_lines - randomNum - 2)
         return pd.read_csv(fileName, skiprows=skip_idx, usecols=selectedCols)
+
+    @staticmethod
+    def saveData(fileName, data):
+        data.to_csv(fileName, index=False)
 
 if __name__ == "__main__":
     selectedCols = ["VendorID",
