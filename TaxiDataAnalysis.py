@@ -4,6 +4,9 @@ from pandas import DataFrame
 import pandas as pd
 import os.path
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 
 
 class TaxiDataAnalysis:
@@ -20,6 +23,23 @@ class TaxiDataAnalysis:
         plt.ylabel("Tip_amount")
         plt.title("Distribution of the Fare_amounts and Tip_amounts")
         plt.show()
+
+    def preditByLinearRegression(self):
+        data = self.__getProcessedTaxiData()
+        features = ["VendorID", "day_night", "passenger_count",
+                    "trip_distance", "PULocationID", "DOLocationID"]
+        X = pd.concat([data[features], data.filter(regex="payment_.*")], axis=1)
+        y = data["fare_amount"]
+
+        X_train, X_test, y_train, y_test = train_test_split(X,
+                                                            y,
+                                                            test_size=0.2,
+                                                            random_state=0)
+
+        linearRegression = LinearRegression()
+        linearRegression.fit(X_train, y_train)
+        y_pred = linearRegression.predict(X_test)
+        self.__plotPredictComparison(y_test, y_pred)
 
     def __getProcessedTaxiData(self):
         if not os.path.exists(destDataFile):
@@ -53,6 +73,13 @@ class TaxiDataAnalysis:
         data["tip_rate_20"] = data.apply(
             lambda x: 0 if x.fare_amount == 0 or x.tip_amount / x.fare_amount < 0.2 else 1, 1)
 
+    def __plotPredictComparison(self, actual, predicted):
+        resultDataFrame = pd.DataFrame({'Actual': actual, 'Predicted': predicted})
+        resultDataFrame.head(50).plot(kind='bar', figsize=(10, 8))
+        plt.grid(which='major', linestyle='-', linewidth='0.5', color='green')
+        plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+        plt.show()
+
 if __name__ == "__main__":
     selectedCols = ["VendorID",
                     "tpep_pickup_datetime",
@@ -71,4 +98,5 @@ if __name__ == "__main__":
         destDataFile,
         selectedCols,
         dataNum)
-    taxiDataAnalysis.plotFareAndTipDistribution()
+    # taxiDataAnalysis.plotFareAndTipDistribution()
+    taxiDataAnalysis.preditByLinearRegression()
