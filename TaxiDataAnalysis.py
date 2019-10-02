@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import KFold
 
 
 class TaxiDataAnalysis:
@@ -26,20 +28,20 @@ class TaxiDataAnalysis:
 
     def preditByLinearRegression(self):
         data = self.__getProcessedTaxiData()
-        features = ["VendorID", "day_night", "passenger_count",
+        features = ["day_night", "passenger_count",
                     "trip_distance", "PULocationID", "DOLocationID"]
-        X = pd.concat([data[features], data.filter(regex="payment_.*")], axis=1)
+        X = pd.concat([data[features], data.filter(regex="payment_type_.*")], axis=1)
         y = data["fare_amount"]
 
-        X_train, X_test, y_train, y_test = train_test_split(X,
-                                                            y,
-                                                            test_size=0.2,
-                                                            random_state=0)
+        kfold = KFold(5, False)
+        totalMSE = 0
+        for train, test in kfold.split(X, y):
+            linearRegression = LinearRegression()
+            linearRegression.fit(X.iloc[train], y.iloc[train])
+            y_pred = linearRegression.predict(X.iloc[test])
+            totalMSE += self.__measureMeanSquaredError(y.iloc[test], y_pred)
 
-        linearRegression = LinearRegression()
-        linearRegression.fit(X_train, y_train)
-        y_pred = linearRegression.predict(X_test)
-        self.__plotPredictComparison(y_test, y_pred)
+        print("average mse: %d" % (totalMSE / 5))
 
     def __getProcessedTaxiData(self):
         if not os.path.exists(destDataFile):
@@ -79,6 +81,9 @@ class TaxiDataAnalysis:
         plt.grid(which='major', linestyle='-', linewidth='0.5', color='green')
         plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
         plt.show()
+
+    def __measureMeanSquaredError(self, actual, predicted):
+        return mean_squared_error(actual, predicted)
 
 if __name__ == "__main__":
     selectedCols = ["VendorID",
