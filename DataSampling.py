@@ -12,7 +12,7 @@ class DataSampling:
         return pd.read_csv(fileName, skiprows=skip_idx, usecols=selectedCols)
 
     @staticmethod
-    def loadData(fileName):
+    def loadProcessedData(fileName):
         return pd.read_csv(fileName)
 
     @staticmethod

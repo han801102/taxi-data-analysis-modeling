@@ -45,7 +45,7 @@ class TaxiDataAnalysis:
         if not os.path.exists(destDataFile):
             return self.__preProcessTaxiData()
         else:
-            return DataSampling.loadData(destDataFile)
+            return DataSampling.loadProcessedData(destDataFile)
 
     def __preProcessTaxiData(self):
         data = DataSampling.loadData(sourceDataFile, dataNum, selectedCols)
