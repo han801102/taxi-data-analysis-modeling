@@ -11,6 +11,10 @@ class DataSampling:
         return pd.read_csv(fileName, skiprows=skip_idx, usecols=selectedCols)
 
     @staticmethod
+    def loadData(fileName):
+        return pd.read_csv(fileName)
+
+    @staticmethod
     def saveData(fileName, data):
         data.to_csv(fileName, index=False)
 

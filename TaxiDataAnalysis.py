@@ -3,6 +3,7 @@ from datetime import datetime
 from pandas import DataFrame
 import pandas as pd
 import os.path
+import matplotlib.pyplot as plt
 
 
 class TaxiDataAnalysis:
@@ -12,9 +13,19 @@ class TaxiDataAnalysis:
         self.selectedCols = selectedCols
         self.dataNum = dataNum
 
-    def analyze(self):
+    def plotFareAndTipDistribution(self):
+        data = self.__getProcessedTaxiData()
+        plt.scatter(data.fare_amount.tolist(), data.tip_amount.tolist())
+        plt.xlabel("Fair_amount")
+        plt.ylabel("Tip_amount")
+        plt.title("Distribution of the Fare_amounts and Tip_amounts")
+        plt.show()
+
+    def __getProcessedTaxiData(self):
         if not os.path.exists(destDataFile):
-            self.__preProcessTaxiData()
+            return self.__preProcessTaxiData()
+        else:
+            return DataSampling.loadData(destDataFile)
 
     def __preProcessTaxiData(self):
         data = DataSampling.loadData(sourceDataFile, dataNum, selectedCols)
@@ -22,6 +33,7 @@ class TaxiDataAnalysis:
         self.__createPaymentDummyData(data)
         self.__calculateTipRate(data)
         DataSampling.saveData(destDataFile, data)
+        return data
 
     def __convertTimeToDayOrNight(self, data):
         dateFormat = "%Y-%m-%d %H:%M:%S"
@@ -54,8 +66,9 @@ if __name__ == "__main__":
     sourceDataFile = "yellow_tripdata_2017-11.csv"
     destDataFile = "taxi-result.csv"
     dataNum = 10000
-    TaxiDataAnalysis(
+    taxiDataAnalysis = TaxiDataAnalysis(
         sourceDataFile,
         destDataFile,
         selectedCols,
-        dataNum).analyze()
+        dataNum)
+    taxiDataAnalysis.plotFareAndTipDistribution()
