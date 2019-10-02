@@ -2,6 +2,7 @@ from DataSampling import DataSampling
 from datetime import datetime
 from pandas import DataFrame
 import pandas as pd
+import os.path
 
 
 class TaxiDataAnalysis:
@@ -12,7 +13,8 @@ class TaxiDataAnalysis:
         self.dataNum = dataNum
 
     def analyze(self):
-        self.__preProcessTaxiData()
+        if not os.path.exists(destDataFile):
+            self.__preProcessTaxiData()
 
     def __preProcessTaxiData(self):
         data = DataSampling.loadData(sourceDataFile, dataNum, selectedCols)
