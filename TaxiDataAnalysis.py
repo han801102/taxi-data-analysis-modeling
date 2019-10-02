@@ -18,6 +18,7 @@ class TaxiDataAnalysis:
         data = DataSampling.loadData(sourceDataFile, dataNum, selectedCols)
         self.__convertTimeToDayOrNight(data)
         self.__createPaymentDummyData(data)
+        self.__calculateTipRate(data)
         DataSampling.saveData(destDataFile, data)
 
     def __convertTimeToDayOrNight(self, data):
@@ -33,6 +34,10 @@ class TaxiDataAnalysis:
         for payment in paymentTypes:
             data["payment_type_%s" % payment] = data.apply(
                 lambda x: 1 if x["payment_type"] == payment else 0, 1)
+
+    def __calculateTipRate(self, data):
+        data["tip_rate_20"] = data.apply(
+            lambda x: 0 if x.fare_amount == 0 or x.tip_amount / x.fare_amount < 0.2 else 1, 1)
 
 if __name__ == "__main__":
     selectedCols = ["VendorID",
