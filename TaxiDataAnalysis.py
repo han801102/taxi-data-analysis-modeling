@@ -11,6 +11,7 @@ from sklearn.metrics import mean_squared_error, precision_score, recall_score, f
 from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 from math import sqrt
 
 
@@ -97,7 +98,28 @@ class TaxiDataAnalysis:
             recalls.append(recall_score(y.iloc[test], y_pred, average="binary"))
             fscores.append(f1_score(y.iloc[test], y_pred, average="binary"))
 
-        print("precision = %s, recall = %s, fscore = %s" % (np.mean(precisions), np.mean(recalls), np.mean(fscores)))
+        print("KNN Classifier precision = %s, recall = %s, fscore = %s" % (np.mean(precisions), np.mean(recalls), np.mean(fscores)))
+
+    def preditByDecisionTree(self):
+        data = self.__getProcessedTaxiData()
+        features = ["day_night", "passenger_count",
+                    "trip_distance", "payment_type"]
+        X = data[features]
+        y = data["tip_rate_20"]
+        kfold = KFold(5, False)
+        splitFold = kfold.split(X, y)
+        precisions = []
+        recalls = []
+        fscores = []
+        for train, test in splitFold:
+            classifier = DecisionTreeClassifier()
+            classifier.fit(X.iloc[train], y.iloc[train])
+            y_pred = classifier.predict(X.iloc[test])
+            precisions.append(precision_score(y.iloc[test], y_pred, average="binary"))
+            recalls.append(recall_score(y.iloc[test], y_pred, average="binary"))
+            fscores.append(f1_score(y.iloc[test], y_pred, average="binary"))
+
+        print("Decision Classifier precision = %s, recall = %s, fscore = %s" % (np.mean(precisions), np.mean(recalls), np.mean(fscores)))
 
     def __getProcessedTaxiData(self):
         if not os.path.exists(destDataFile):
@@ -173,3 +195,4 @@ if __name__ == "__main__":
     taxiDataAnalysis.preditByLinearRegression()
     taxiDataAnalysis.preditByKNNRegression()
     taxiDataAnalysis.preditByKNNClassifier()
+    taxiDataAnalysis.preditByDecisionTree()

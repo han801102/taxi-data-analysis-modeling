@@ -5,7 +5,6 @@ import random
 class DataSampling:
     @staticmethod
     def loadData(fileName, randomNum, selectedCols):
-        # TODO filter zero data for fair amounts column
         num_lines = sum(1 for l in open(fileName))
         skip_idx = random.sample(range(2, num_lines),
                                  num_lines - randomNum - 2)
