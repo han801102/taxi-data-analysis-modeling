@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, precision_score, recall_score, f1_score
 from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neighbors import KNeighborsClassifier
 from math import sqrt
 
 
@@ -74,6 +75,29 @@ class TaxiDataAnalysis:
         print(mse)
         print("KNN average mse: %d" % np.mean(mse))
         print("KNN average standard deviation: %d" % np.std(mse))
+
+    def preditByKNNClassifier(self):
+        data = self.__getProcessedTaxiData()
+        features = ["day_night", "passenger_count",
+                    "trip_distance"]
+        X = pd.concat([data[features], data.filter(regex="payment_type_.*")], axis=1)
+        y = data["tip_rate_20"]
+
+        kfold = KFold(5, False)
+        splitFold = kfold.split(X, y)
+
+        precisions = []
+        recalls = []
+        fscores = []
+        for train, test in splitFold:
+            classifier = KNeighborsClassifier()
+            classifier.fit(X.iloc[train], y.iloc[train])
+            y_pred = classifier.predict(X.iloc[test])
+            precisions.append(precision_score(y.iloc[test], y_pred, average="binary"))
+            recalls.append(recall_score(y.iloc[test], y_pred, average="binary"))
+            fscores.append(f1_score(y.iloc[test], y_pred, average="binary"))
+
+        print("precision = %s, recall = %s, fscore = %s" % (np.mean(precisions), np.mean(recalls), np.mean(fscores)))
 
     def __getProcessedTaxiData(self):
         if not os.path.exists(destDataFile):
@@ -148,3 +172,4 @@ if __name__ == "__main__":
     # taxiDataAnalysis.plotFareAndTipDistribution()
     taxiDataAnalysis.preditByLinearRegression()
     taxiDataAnalysis.preditByKNNRegression()
+    taxiDataAnalysis.preditByKNNClassifier()
